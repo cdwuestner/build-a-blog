@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-
 <h2>Add a New Blog Post:</h2>
 
 <form action="/addpost" method="post">
@@ -20,17 +19,4 @@
 </form>
 
 <p class="error">{{ error if error else "" }}</p>
-
-<h2>5 Most Recent Blog Posts:</h2>
-
-<ul>
-{% for post in posts %}
-    <li>
-        <h3>{{ post.title }}</h3>
-        <p>{{ post.created }}</p>
-        <p>{{ post.body }}</p>
-    </li>
-{% endfor %}
-</ul>
-
 {% endblock %}

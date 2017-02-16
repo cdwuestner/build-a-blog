@@ -25,8 +25,48 @@ class Handler(webapp2.RequestHandler):
         self.response.write("Oops! Something went wrong.")
 
 class Index(Handler):
+    """ Handles requests coming into '/'
+        eg www.build-a-blog.com/
+    """
+
     def get(self):
-        self.response.write('Hello world!')
+        t = jinja_env.get_template("base.html")
+        content = t.render()
+        self.response.write(content)
+
+class AddPost(Handler):
+    """ Handles requests coming into '/addpost'
+        eg www.build-a-blog.com/addpost
+    """
+
+    def post(self):
+        new_post_title = self.request.get("new-title")
+        new_post_body = self.request.get("new-body")
+
+        # if the user typed nothing at all, redirect and yell at them
+        if (not new_post_title) or (new_post_title.strip() == ""):
+            error = "Your post must have a title."
+            self.redirect("/?error=" + cgi.escape(error))
+
+        # if the user typed nothing at all, redirect and yell at them
+        if (not new_post_body) or (new_post_body.strip() == ""):
+            error = "Your post must have a body."
+            self.redirect("/?error=" + cgi.escape(error))
+
+        # 'escape' the user's input so that if they typed HTML, it doesn't mess up our site
+        new_post_title_escaped = cgi.escape(new_post_title, quote=True)
+        new_post_body_escaped = cgi.escape(new_post_body, quote=True)
+
+        # construct a blog post object for the new post
+        blog_post = BlogPost(title = new_post_title_escaped, body = new_post_body_escaped)
+        blog_post.put()
+
+        # render the main blog page
+        recent_posts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY created DESC LIMIT 5")
+
+        t = jinja_env.get_template("blog.html")
+        content = t.render(posts = recent_posts)
+        self.response.write(content)
 
 class ShowRecent(Handler):
     """ Handles requests coming in to /blog
@@ -45,5 +85,6 @@ class ShowRecent(Handler):
 
 app = webapp2.WSGIApplication([
     ('/', Index),
+    ('/addpost', AddPost),
     ('/blog', ShowRecent)
 ], debug=True)
