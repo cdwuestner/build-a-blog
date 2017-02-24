@@ -55,8 +55,8 @@ class AddPost(Handler):
         self.response.write(content)
 
     def post(self):
-        new_post_title = self.request.get("new-title")
-        new_post_body = self.request.get("new-body")
+        new_post_title = cgi.escape(self.request.get("new-title"), quote=True)
+        new_post_body = cgi.escape(self.request.get("new-body"), quote=True)
         error = ""
 
         # if the user left empty field, redirect and yell at them
